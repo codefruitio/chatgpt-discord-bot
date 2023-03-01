@@ -6,7 +6,7 @@ You'll need a Discord bot to get started. Here is a reference for how to set one
 
 [https://discord.com/developers/docs/getting-started](https://discord.com/developers/docs/getting-started)
 
-You'll also need to grab your API key from your OpenAI profile
+You'll also need to grab your API key from your OpenAI profile.
 
 ## run
 
