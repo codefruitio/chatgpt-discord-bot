@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from dotenv import load_dotenv
 import openai
+import requests
 import os
 
 memory = "his name is chatbot"
@@ -36,11 +37,28 @@ async def chat(interaction: discord.Interaction, *, message: str):
     user = interaction.user.mention
     await interaction.channel.send(user + ": " + message + "\n\n" + response)
     return
+
+
+@client.tree.command(name="whisper", description="Convert speech to text.")
+async def whisper(interaction: discord.Interaction, *, url: str):
+    await interaction.response.send_message("Transcribing...", ephemeral=True, delete_after=3)
+    
+    filename = url.split("/")[6]
+    
+    r = requests.get(url)
+    with open(f"{filename}", 'wb') as outfile:
+        outfile.write(r.content)
+
+    
+    audio_file = open(f"{filename}", "rb")
+    transcript = openai.Audio.transcribe("whisper-1", audio_file)
+    user = interaction.user.mention
+    await interaction.channel.send(user + "\n```" + f"{transcript}" + "\n```")
+    return
     
 
 if __name__ == '__main__':
     load_dotenv()
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     openai.api_key = os.getenv("OPENAI_API_KEY")
-
     client.run(discord_token)
