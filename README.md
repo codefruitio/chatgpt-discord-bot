@@ -6,23 +6,7 @@ You'll need a Discord bot to get started. Here is a reference for how to set one
 
 [https://discord.com/developers/docs/getting-started](https://discord.com/developers/docs/getting-started)
 
-You'll also need to grap your API key from your OpenAI profile
-
-## pull
-
-```
-# pull image from dockerhub
-docker pull tylerplesetz/chatgpturbot:latest
-
-```
-
-## build
-
-```
-# build image
-sudo docker build -t chatgpturbot .
-
-```
+You'll also need to grab your API key from your OpenAI profile
 
 ## run
 
