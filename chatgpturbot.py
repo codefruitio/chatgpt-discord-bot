@@ -5,8 +5,10 @@ import openai
 import requests
 import os
 
+# initialize memory
 memory = "his name is chatbot"
 
+# initialize discord client
 class aclient(discord.Client):
     def __init__(self) -> None:
         intents = discord.Intents.default()
@@ -15,12 +17,15 @@ class aclient(discord.Client):
         self.tree = app_commands.CommandTree(self)
         self.activity = discord.Activity(type=discord.ActivityType.watching, name="you")
 
+# pass discord client into a subclass
 client = aclient()
         
+# sync discord application commands on bot startup
 @client.event
 async def on_ready():
     await client.tree.sync()
 
+# wait for use of /chat command
 @client.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
     global memory
@@ -39,6 +44,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
     return
 
 
+# wait for use of /whisper command
 @client.tree.command(name="whisper", description="Convert speech to text.")
 async def whisper(interaction: discord.Interaction, *, url: str):
     await interaction.response.send_message("Transcribing...", ephemeral=True, delete_after=3)
@@ -57,6 +63,7 @@ async def whisper(interaction: discord.Interaction, *, url: str):
     return
     
 
+# run the bot
 if __name__ == '__main__':
     load_dotenv()
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
