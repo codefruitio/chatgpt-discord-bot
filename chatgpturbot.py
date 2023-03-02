@@ -43,7 +43,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
 async def whisper(interaction: discord.Interaction, *, url: str):
     await interaction.response.send_message("Transcribing...", ephemeral=True, delete_after=3)
     
-    filename = url.split("/")[6]
+    filename = url.split("/")[-1]
     
     r = requests.get(url)
     with open(f"{filename}", 'wb') as outfile:
