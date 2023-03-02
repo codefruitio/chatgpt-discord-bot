@@ -1,6 +1,6 @@
 # ChatGPT Discord Bot
 
-# chatgpturbot
+# chatgpt-turbo-discord-bot
 
 You'll need a Discord bot to get started. Here is a reference for how to set one up
 
