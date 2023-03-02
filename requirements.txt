@@ -1,4 +1,3 @@
 discord
 openai
 python-dotenv
-pyyaml==5.4.2
