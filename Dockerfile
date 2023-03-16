@@ -4,7 +4,7 @@ WORKDIR /chatgpturbot
 
 COPY requirements.txt .
 
-COPY notes /notes
+COPY notes chatgpturbot/notes
 
 RUN apk add --no-cache --virtual .build-deps build-base && \
     pip install -r requirements.txt && \
