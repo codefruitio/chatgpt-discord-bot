@@ -5,8 +5,18 @@ import openai
 import requests
 import os
 
+
 # initialize memory
 memory = "his name is chatbot"
+path_to_notes = "notes"
+# Load all the Markdown files and combine their content
+context_notes = ""
+for root, _, files in os.walk(path_to_notes):
+    for file in files:
+        if file.endswith(".md"):
+            with open(os.path.join(root, file), "r") as md_file:
+                context_notes += md_file.read() + "\n\n"
+
 
 # initialize discord client
 class aclient(discord.Client):
@@ -29,13 +39,16 @@ async def on_ready():
 @client.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
     global memory
+    global context_notes
+    context = message + context_notes + memory
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "assistant", "content": memory},
+            {"role": "assistant", "content": context_notes},
             {"role": "user", "content": message}
         ]
+        
     )
     response = response['choices'][0]['message']['content']
     memory += message + "\n"
@@ -66,6 +79,7 @@ async def whisper(interaction: discord.Interaction, *, url: str):
 # run the bot
 if __name__ == '__main__':
     load_dotenv()
+    path_to_notes=os.getenv("PATH_TO_NOTES")
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     openai.api_key = os.getenv("OPENAI_API_KEY")
     client.run(discord_token)
