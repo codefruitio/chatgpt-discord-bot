@@ -8,7 +8,7 @@ import os
 
 # initialize memory
 memory = "his name is chatbot"
-path_to_notes = "chatgpturbot/notes"
+path_to_notes = "notes"
 # Load all the Markdown files and combine their content
 context_notes = ""
 for root, _, files in os.walk(path_to_notes):
