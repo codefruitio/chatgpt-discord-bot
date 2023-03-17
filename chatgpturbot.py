@@ -48,7 +48,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
         messages=[
             {"role": "system", "content": "You are a helpful assistant. The context you receive will be a series of Markdown notes from the user that you will need to answer questions about. You will also receive a history of the conversation so far."},           
             {"role": "assistant", "content": context_notes},
-            {"role": "user", "content": chat_history}
+            {"role": "user", "content": chat_history},
             {"role": "user", "content": message}
         ]
         
