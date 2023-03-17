@@ -36,7 +36,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant. The context you receive will JSON containing notes from the user that you will need to answer questions about. Please use the provided Metada for sorting to make sure you respond correctly. You will also receive a history of the conversation so far."},           
+            {"role": "system", "content": "You are a helpful assistant. You are a master at reading JSON. You will receive JSON containing notes from the user that you will need to answer questions about. Please use the provided Metada for sorting to make sure you respond correctly. You will also receive a history of the conversation so far."},           
             {"role": "assistant", "content": f"{notes}"},
             {"role": "user", "content": chat_history},
             {"role": "user", "content": message}
@@ -44,7 +44,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
         
     )
     response = response['choices'][0]['message']['content']
-    chat_history += message + "\n" + response
+    chat_history += message + "\n"
     user = interaction.user.mention
     await interaction.channel.send(user + ": " + message + "\n\n" + response)
     return
