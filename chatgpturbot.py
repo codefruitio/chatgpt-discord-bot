@@ -8,14 +8,16 @@ import os
 
 # initialize memory
 memory = "his name is chatbot"
-path_to_notes = "notes"
-# Load all the Markdown files and combine their content
-context_notes = ""
-for root, _, files in os.walk(path_to_notes):
-    for file in files:
-        if file.endswith(".md"):
-            with open(os.path.join(root, file), "r") as md_file:
-                context_notes += md_file.read() + "\n\n"
+def update_memory():
+    path_to_notes = "notes"
+    # Load all the Markdown files and combine their content
+    context_notes = ""
+    for root, _, files in os.walk(path_to_notes):
+        for file in files:
+            if file.endswith(".md"):
+                with open(os.path.join(root, file), "r") as md_file:
+                    context_notes += md_file.read() + "\n\n\n\n"
+    return context_notes
 
 
 # initialize discord client
@@ -39,8 +41,7 @@ async def on_ready():
 @client.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
     global memory
-    global context_notes
-    context = message + context_notes + memory
+    context_notes = update_memory()
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
