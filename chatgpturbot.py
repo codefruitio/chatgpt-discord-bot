@@ -42,13 +42,13 @@ async def on_ready():
 async def chat(interaction: discord.Interaction, *, message: str):
     global chat_history
     context_notes = update_memory()
-    context = chat_history + "\n\n\n\n" + context_notes
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant. The context you receive will be a series of Markdown notes from the user that you will need to answer questions about. You will also receive a history of the conversation so far."},           
-            {"role": "assistant", "content": context},
+            {"role": "assistant", "content": context_notes},
+            {"role": "user", "content": chat_history}
             {"role": "user", "content": message}
         ]
         
