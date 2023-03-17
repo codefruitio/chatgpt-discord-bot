@@ -10,4 +10,6 @@ RUN apk add --no-cache --virtual .build-deps build-base && \
 
 COPY chatgpturbot.py .
 
+COPY mdtojson.py .
+
 CMD ["python", "chatgpturbot.py"]
