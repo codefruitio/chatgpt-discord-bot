@@ -4,21 +4,11 @@ from dotenv import load_dotenv
 import openai
 import requests
 import os
+from mdtojson import collect_notes
 
 
 # initialize memory
 chat_history = "his name is chatbot"
-def update_memory():
-    path_to_notes = "notes"
-    # Load all the Markdown files and combine their content
-    context_notes = ""
-    for root, _, files in os.walk(path_to_notes):
-        for file in files:
-            if file.endswith(".md"):
-                with open(os.path.join(root, file), "r") as md_file:
-                    context_notes += md_file.read() + "\n\n\n\n"
-    return context_notes
-
 
 # initialize discord client
 class aclient(discord.Client):
@@ -41,13 +31,13 @@ async def on_ready():
 @client.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
     global chat_history
-    context_notes = update_memory()
+    notes = collect_notes()
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant. The context you receive will be a series of Markdown notes from the user that you will need to answer questions about. You will also receive a history of the conversation so far."},           
-            {"role": "assistant", "content": context_notes},
+            {"role": "assistant", "content": f"{notes}"},
             {"role": "user", "content": chat_history},
             {"role": "user", "content": message}
         ]
