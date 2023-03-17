@@ -54,7 +54,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
         
     )
     response = response['choices'][0]['message']['content']
-    memory += message + "\n"
+    chat_history += message + "\n"
     user = interaction.user.mention
     await interaction.channel.send(user + ": " + message + "\n\n" + response)
     return
