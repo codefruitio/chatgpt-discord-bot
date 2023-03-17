@@ -7,7 +7,7 @@ import os
 
 
 # initialize memory
-memory = "his name is chatbot"
+chat_history = "his name is chatbot"
 def update_memory():
     path_to_notes = "notes"
     # Load all the Markdown files and combine their content
@@ -40,13 +40,15 @@ async def on_ready():
 # wait for use of /chat command
 @client.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
-    global memory
+    global chat_history
     context_notes = update_memory()
+    context = chat_history + "\n\n\n\n" + context_notes
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "assistant", "content": context_notes},
+            {"role": "system", "content": "You are a helpful assistant. The context you receive will be a series of Markdown notes from the user that you will need to answer questions about. You will also receive a history of the conversation so far."},           
+            {"role": "assistant", "content": context},
             {"role": "user", "content": message}
         ]
         
