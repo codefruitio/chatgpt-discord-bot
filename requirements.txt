@@ -1,3 +1,5 @@
 discord
 openai
 python-dotenv
+pyyaml
+markdown
