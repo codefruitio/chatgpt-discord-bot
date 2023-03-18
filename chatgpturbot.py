@@ -10,6 +10,17 @@ from mdtojson import collect_notes
 # initialize memory
 chat_history = "his name is chatbot"
 
+# initialize bot context
+bot_context = """You are a Product Manager. You are a master at reading JSON. 
+You will receive markdown notes that have been reformatted into JSON from the user that you will need to answer questions about.
+Please use the provided Metada to help you find the correct note(s). 
+It is important for you to identify the correct note based on the users request.
+It is important for you to respond to the user with the correct information.
+Be on the lookout for product insights and customer sentiment.
+The goal of the user is to build better products. You need to help them do that.
+You will also receive a history of the conversation so far."
+"""
+
 # initialize discord client
 class aclient(discord.Client):
     def __init__(self) -> None:
@@ -31,12 +42,13 @@ async def on_ready():
 @client.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
     global chat_history
+    global bot_context
     notes = collect_notes()
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant. You are a master at reading JSON. You will receive JSON containing notes from the user that you will need to answer questions about. Please use the provided Metada for sorting to make sure you respond correctly. You will also receive a history of the conversation so far."},           
+            {"role": "system", "content": f"{bot_context}"},           
             {"role": "assistant", "content": f"{notes}"},
             {"role": "user", "content": chat_history},
             {"role": "user", "content": message}
