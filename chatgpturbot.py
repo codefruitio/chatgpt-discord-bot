@@ -55,10 +55,14 @@ async def chat(interaction: discord.Interaction, *, message: str):
         ]
         
     )
-    response = response['choices'][0]['message']['content']
     chat_history += message + "\n"
+    response = response['choices'][0]['message']['content']
     user = interaction.user.mention
-    await interaction.channel.send(user + ": " + message + "\n\n" + response)
+    max_message_length = 2000 - len(user) - len(message) - 2 # subtracting 2 for the newline characters
+    chunks = [response[i:i+max_message_length] for i in range(0, len(response), max_message_length)]
+    for chunk in chunks:
+        await interaction.channel.send(user + ": " + message + "\n\n" + chunk)
+
     return
 
 
