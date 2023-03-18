@@ -57,6 +57,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
     )
     chat_history += message + "\n"
     response = response['choices'][0]['message']['content']
+    print(response)
     user = interaction.user.mention
     max_message_length = 2000 - len(user) - len(message) - 2 # subtracting 2 for the newline characters
     chunks = [response[i:i+max_message_length] for i in range(0, len(response), max_message_length)]
