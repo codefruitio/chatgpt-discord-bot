@@ -5,20 +5,24 @@ import openai
 import requests
 import os
 from mdtojson import collect_notes
+import logging
 
 
 # initialize memory
 chat_history = "his name is chatbot"
 
+# initialize log
+logging.basicConfig(filename='debug.log', level=logging.INFO)
+
+
+
 # initialize bot context
-bot_context = """You are a Product Manager. You are a master at reading JSON. 
-You will receive markdown notes that have been reformatted into JSON from the user that you will need to answer questions about.
+bot_context = """You are a Product Manager.
+You will receive JSON data from the user that you will need to answer questions about.
 Please use the provided Metada to help you find the correct note(s). 
-It is important for you to identify the correct note based on the users request.
-It is important for you to respond to the user with the correct information.
+It is important for you to identify the correct notes and provide accurate information.
 Be on the lookout for product insights and customer sentiment.
 The goal of the user is to build better products. You need to help them do that.
-You will also receive a history of the conversation so far."
 """
 
 # initialize discord client
@@ -57,7 +61,8 @@ async def chat(interaction: discord.Interaction, *, message: str):
     )
     chat_history += message + "\n"
     response = response['choices'][0]['message']['content']
-    print(response)
+    # Log a message
+    logging.info(response)
     user = interaction.user.mention
     max_message_length = 2000 - len(user) - len(message) - 2 # subtracting 2 for the newline characters
     chunks = [response[i:i+max_message_length] for i in range(0, len(response), max_message_length)]
