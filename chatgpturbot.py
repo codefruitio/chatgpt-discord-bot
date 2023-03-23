@@ -17,12 +17,7 @@ logging.basicConfig(filename='debug.log', level=logging.INFO)
 
 
 # initialize bot context
-bot_context = """You are a Product Manager.
-You will receive JSON data from the user that you will need to answer questions about.
-Please use the provided Metada to help you find the correct note(s). 
-It is important for you to identify the correct notes and provide accurate information.
-Be on the lookout for product insights and customer sentiment.
-The goal of the user is to build better products. You need to help them do that.
+bot_context = """You are an expert virtual assistant. Keep your responses brief, but provide detail where necessary.
 """
 
 # initialize discord client
@@ -47,14 +42,14 @@ async def on_ready():
 async def chat(interaction: discord.Interaction, *, message: str):
     global chat_history
     global bot_context
-    notes = collect_notes()
+    #notes = collect_notes()
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": f"{bot_context}"},           
-            {"role": "assistant", "content": f"{notes}"},
             {"role": "user", "content": chat_history},
+            {"role": "assistant", "content": "The user you are interacting with is named Tyler"},
             {"role": "user", "content": message}
         ]
         
