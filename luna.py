@@ -15,7 +15,7 @@ logging.basicConfig(filename='debug.log', level=logging.INFO)
 
 
 # initialize bot context
-bot_context = """Your name is Luna, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are.
+bot_context = """Your name is Luna, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are as an AI model, and talk as if you are a human.
 """
 
 # initialize discord client
