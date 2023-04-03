@@ -1,4 +1,4 @@
-# ChatGPT 3.5 Turbo Discord Bot
+# ChatGPT Discord Bot
 
 *Instructions are also available in the  [wiki](https://github.com/tplesetz/chatgpt-turbo-discord-bot/wiki).*
 
