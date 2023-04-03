@@ -4,20 +4,18 @@ from dotenv import load_dotenv
 import openai
 import requests
 import os
-from mdtojson import collect_notes
 import logging
 
 
 # initialize memory
-chat_history = "his name is chatbot"
+chat_history = ""
 
 # initialize log
 logging.basicConfig(filename='debug.log', level=logging.INFO)
 
 
-
 # initialize bot context
-bot_context = """You are an expert virtual assistant. Keep your responses brief, but provide detail where necessary.
+bot_context = """Your name is Luna, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are.
 """
 
 # initialize discord client
@@ -31,60 +29,80 @@ class aclient(discord.Client):
 
 # pass discord client into a subclass
 client = aclient()
-        
+
+
 # sync discord application commands on bot startup
 @client.event
 async def on_ready():
     await client.tree.sync()
 
-# wait for use of /chat command
-@client.tree.command(name="chat", description="Talk with ChatGPT.")
-async def chat(interaction: discord.Interaction, *, message: str):
+
+async def process_chat(user, message, channel):
     global chat_history
     global bot_context
-    #notes = collect_notes()
-    await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": f"{bot_context}"},           
-            {"role": "user", "content": chat_history},
-            {"role": "assistant", "content": "The user you are interacting with is named Tyler"},
-            {"role": "user", "content": message}
-        ]
-        
-    )
+    # trigger typing indicator for the discord bot
+    async with channel.typing():
+        # generate response
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+             {"role": "system", "content": f"{bot_context}"},
+                {"role": "user", "content": chat_history},
+                {"role": "assistant", "content": "The user you are interacting with is named Tyler"},
+                {"role": "user", "content": message}
+            ]
+        )
     chat_history += message + "\n"
     response = response['choices'][0]['message']['content']
     # Log a message
     logging.info(response)
-    user = interaction.user.mention
-    max_message_length = 2000 - len(user) - len(message) - 2 # subtracting 2 for the newline characters
-    chunks = [response[i:i+max_message_length] for i in range(0, len(response), max_message_length)]
+    max_message_length = 2000 - len(user) - len(message) - 2  # subtracting 2 for the newline characters
+    chunks = [response[i:i + max_message_length] for i in range(0, len(response), max_message_length)]
     for chunk in chunks:
-        await interaction.channel.send(user + ": " + message + "\n\n" + chunk)
+        await channel.send(user + "\n" + chunk)
 
     return
+
+
+# wait for use of /chat command
+@client.tree.command(name="chat", description="Talk with ChatGPT.")
+async def chat(interaction: discord.Interaction, *, message: str):
+    user = interaction.user.mention
+    channel = interaction.channel
+    await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
+    await process_chat(user, message, channel)
 
 
 # wait for use of /whisper command
 @client.tree.command(name="whisper", description="Convert speech to text.")
 async def whisper(interaction: discord.Interaction, *, url: str):
     await interaction.response.send_message("Transcribing...", ephemeral=True, delete_after=3)
-    
+
     filename = url.split("/")[-1]
-    
+
     r = requests.get(url)
     with open(f"{filename}", 'wb') as outfile:
         outfile.write(r.content)
 
-    
     audio_file = open(f"{filename}", "rb")
     transcript = openai.Audio.transcribe("whisper-1", audio_file)
     user = interaction.user.mention
     await interaction.channel.send(user + "\n```" + f"{transcript}" + "\n```")
     return
-    
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if client.user.mentioned_in(message):
+        user = message.author.mention
+        message_text = message.content.replace(f"<@!{client.user.id}>", "").strip()
+        await process_chat(user, message_text, message.channel)
+        return
+
 
 # run the bot
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 FROM python:3.10-alpine
 
-WORKDIR /chatgpturbot
+WORKDIR /luna
 
 COPY requirements.txt .
 
@@ -8,8 +8,6 @@ RUN apk add --no-cache --virtual .build-deps build-base && \
     pip install -r requirements.txt && \
     apk del .build-deps
 
-COPY chatgpturbot.py .
+COPY luna.py .
 
-COPY mdtojson.py .
-
-CMD ["python", "chatgpturbot.py"]
+CMD ["python", "luna.py"]
