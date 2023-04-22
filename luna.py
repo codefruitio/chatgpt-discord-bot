@@ -57,10 +57,7 @@ async def process_chat(user, message, channel):
     response = response['choices'][0]['message']['content']
     # Log a message
     logging.info(response)
-    max_message_length = 2000 - len(user) - len(message) - 2  # subtracting 2 for the newline characters
-    chunks = [response[i:i + max_message_length] for i in range(0, len(response), max_message_length)]
-    for chunk in chunks:
-        await channel.send(user + "\n" + chunk)
+    await channel.send(user + "\n" + response)
 
     return
 
@@ -72,6 +69,7 @@ async def chat(interaction: discord.Interaction, *, message: str):
     channel = interaction.channel
     await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
     await process_chat(user, message, channel)
+    return
 
 
 # wait for use of /whisper command
