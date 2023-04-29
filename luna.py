@@ -45,7 +45,7 @@ async def process_chat(user, message, channel):
         # generate response
 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
              {"role": "system", "content": f"{bot_context}"},
                 {"role": "user", "content": chat_history},
