@@ -1,110 +1,82 @@
 import discord
+from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 import requests
 import os
 import logging
 
 
-# initialize memory
-chat_history = ""
+
+# Load environment variables
+load_dotenv()
+discord_token = os.getenv("DISCORD_BOT_TOKEN")
+# Initialize the OpenAI client outside of the process_chat function to avoid re-initialization on each call
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # initialize log
 logging.basicConfig(filename='debug.log', level=logging.INFO)
-
 
 # initialize bot context
 bot_context = """Your name is Samantha, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are as an AI model, and talk as if you are a human.
 """
 
 # initialize discord client
-class aclient(discord.Client):
-    def __init__(self) -> None:
-        intents = discord.Intents.default()
-        intents.message_content = True
-        super().__init__(intents=intents)
-        self.tree = app_commands.CommandTree(self)
-        self.activity = discord.Activity(type=discord.ActivityType.watching, name="you")
-
-# pass discord client into a subclass
-client = aclient()
-
-
-# sync discord application commands on bot startup
-@client.event
-async def on_ready():
-    await client.tree.sync()
-
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents, activity=discord.Activity(type=discord.ActivityType.watching, name="you"))
 
 async def process_chat(user, message, channel):
-    global chat_history
+    # Assuming bot_context is defined elsewhere and doesn't change.
     global bot_context
-    # trigger typing indicator for the discord bot
-    async with channel.typing():
-        # generate response
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4-1106-preview",
+    try:
+        # generate response using the new client structure
+        completion = client.chat.completions.create(
+            model="gpt-4",  # Make sure this is the correct model
             messages=[
-             {"role": "system", "content": f"{bot_context}"},
-                {"role": "user", "content": chat_history},
-                {"role": "assistant", "content": "The user you are interacting with is named Tyler"},
+                {"role": "system", "content": bot_context},
                 {"role": "user", "content": message}
             ]
         )
-    chat_history += message + "\n"
-    response = response['choices'][0]['message']['content']
-    # Log a message
-    logging.info(response)
-    await channel.send(user + "\n" + response)
 
-    return
+        # Extract the response text
+        response_text = completion.choices[0].message['content']
+        
+        # Log the response for debugging
+        logging.info(response_text)
+
+        # Send the response to the Discord channel
+        await channel.send(f"{user}\n{response_text}")
+
+    except Exception as e:
+        if e.status_code == 429:
+            await channel.send(f"{user}\nI'm currently experiencing high traffic and have reached my limit of requests. Please try again later.")
+        else:
+            await channel.send(f"{user}\nI encountered an error while processing your message.")
+        logging.error(f"An error occurred: {str(e)}")
 
 
-# wait for use of /chat command
-@client.tree.command(name="chat", description="Talk with ChatGPT.")
+
+
+@bot.tree.command(name="chat", description="Talk with ChatGPT.")
 async def chat(interaction: discord.Interaction, *, message: str):
+    # Only defer if the interaction has not been responded to
+    if not interaction.response.is_done():
+        await interaction.response.defer(ephemeral=True)
+
     user = interaction.user.mention
     channel = interaction.channel
-    await interaction.response.send_message("Thinking...", ephemeral=True, delete_after=3)
+
+    # Process the chat
     await process_chat(user, message, channel)
-    return
 
+    # After processing, edit the original deferred response
+    await interaction.edit_original_response(content="Message processed.")
 
-# wait for use of /whisper command
-@client.tree.command(name="whisper", description="Convert speech to text.")
-async def whisper(interaction: discord.Interaction, *, url: str):
-    await interaction.response.send_message("Transcribing...", ephemeral=True, delete_after=3)
-
-    filename = url.split("/")[-1]
-
-    r = requests.get(url)
-    with open(f"{filename}", 'wb') as outfile:
-        outfile.write(r.content)
-
-    audio_file = open(f"{filename}", "rb")
-    transcript = openai.Audio.transcribe("whisper-1", audio_file)
-    user = interaction.user.mention
-    await interaction.channel.send(user + "\n```" + f"{transcript}" + "\n```")
-    return
-
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    if client.user.mentioned_in(message):
-        user = message.author.mention
-        message_text = message.content.replace(f"<@!{client.user.id}>", "").strip()
-        await process_chat(user, message_text, message.channel)
-        return
 
 
 # run the bot
 if __name__ == '__main__':
-    load_dotenv()
-    discord_token = os.getenv("DISCORD_BOT_TOKEN")
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    client.run(discord_token)
+    bot.run(discord_token)
