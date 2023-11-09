@@ -3,3 +3,4 @@ openai
 python-dotenv
 pyyaml
 markdown
+requests
