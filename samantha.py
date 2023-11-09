@@ -15,7 +15,7 @@ logging.basicConfig(filename='debug.log', level=logging.INFO)
 
 
 # initialize bot context
-bot_context = """Your name is Luna, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are as an AI model, and talk as if you are a human.
+bot_context = """Your name is Samantha, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are as an AI model, and talk as if you are a human.
 """
 
 # initialize discord client
@@ -45,7 +45,7 @@ async def process_chat(user, message, channel):
         # generate response
 
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4-1106-preview",
             messages=[
              {"role": "system", "content": f"{bot_context}"},
                 {"role": "user", "content": chat_history},
@@ -105,7 +105,6 @@ async def on_message(message):
 # run the bot
 if __name__ == '__main__':
     load_dotenv()
-    path_to_notes=os.getenv("PATH_TO_NOTES")
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     openai.api_key = os.getenv("OPENAI_API_KEY")
     client.run(discord_token)

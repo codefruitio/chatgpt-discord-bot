@@ -1,6 +1,6 @@
 FROM python:3.10-alpine
 
-WORKDIR /luna
+WORKDIR /samantha
 
 COPY requirements.txt .
 
@@ -8,6 +8,6 @@ RUN apk add --no-cache --virtual .build-deps build-base && \
     pip install -r requirements.txt && \
     apk del .build-deps
 
-COPY luna.py .
+COPY samantha.py .
 
-CMD ["python", "luna.py"]
+CMD ["python", "samantha.py"]
