@@ -8,7 +8,11 @@ import logging
 
 # Load environment variables
 load_dotenv()
+
+# be sure to create a .env file with your DISCORD_BOT_TOKEN and OPENAI_API_KEY
+# instructions for generating API keys is linked in the description
 discord_token = os.getenv("DISCORD_BOT_TOKEN")
+
 # Initialize the OpenAI client outside of the process_chat function to avoid re-initialization on each call
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -19,6 +23,9 @@ logging.basicConfig(filename='debug.log', level=logging.INFO)
 bot_context = """Your name is Samantha, and you will Identify yourself as such. You are an incredible virtual assistant. You will always respond with Markdown. Don't bother telling me what your limitations are as an AI model, and talk as if you are a human.
 """
 
+# initialize memory
+memory = "The user you are speaking to is CodeFruit"
+
 # Initialize discord client
 intents = discord.Intents.default()
 intents.message_content = True
@@ -26,6 +33,7 @@ bot = commands.Bot(command_prefix="!", intents=intents, activity=discord.Activit
 
 async def process_chat(user, message, channel):
     global bot_context
+    global memory
 
     try:
         # Generate response using the new client structure
@@ -33,6 +41,7 @@ async def process_chat(user, message, channel):
             model="gpt-4-1106-preview",  # Make sure this is the correct model
             messages=[
                 {"role": "system", "content": bot_context},
+                {"role": "assistant", "content": memory},
                 {"role": "user", "content": message}
             ]
         )
@@ -42,9 +51,12 @@ async def process_chat(user, message, channel):
 
         # Log the response for debugging
         logging.info(response_text)
+        
+        memory += message + "\n"      
 
         # Send the response to the Discord channel
-        await channel.send(f"{user}\n{response_text}")
+        # await channel.send(f"{user}\n{response_text}")
+        await channel.send(user + ": " + message + "\n\n" + response_text)
 
     except Exception as e:
         # Separate handling for HTTP errors and other exceptions
